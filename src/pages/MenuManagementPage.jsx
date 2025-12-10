@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { googleSheetsService } from '../services/googleSheetsService';
+import { firestoreService } from '../services/firestoreService';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,13 +12,15 @@ export default function MenuManagementPage() {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        loadMenus();
+        if (user && user.branch) {
+            loadMenus();
+        }
     }, [user]);
 
     const loadMenus = async () => {
         try {
             setLoading(true);
-            const data = await googleSheetsService.getMenus(user.branch);
+            const data = await firestoreService.getMenus(user.branch);
             setMenus(data);
         } catch (error) {
             console.error('Failed to load menus', error);
@@ -31,7 +33,7 @@ export default function MenuManagementPage() {
     const handleDelete = async (id) => {
         if (!window.confirm('정말 삭제하시겠습니까?')) return;
         try {
-            await googleSheetsService.deleteMenu(id);
+            await firestoreService.deleteMenu(id);
             setMenus(menus.filter(m => m.id !== id));
         } catch (error) {
             console.error('Failed to delete menu', error);

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Store, User, Lock } from 'lucide-react';
+import { User, Lock, Mail } from 'lucide-react';
 
 export default function LoginPage() {
-    const [branch, setBranch] = useState('용호동점');
-    const [id, setId] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +17,11 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            await login(id, password, branch);
+            await login(email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message);
+            console.error(err);
+            setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
         } finally {
             setIsLoading(false);
         }
@@ -35,45 +35,26 @@ export default function LoginPage() {
                         힐링쿡 재고 관리
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        지점과 사번을 입력하여 로그인해주세요.
+                        이메일과 비밀번호를 입력하여 로그인해주세요.
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div className="mb-4">
-                            <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">
-                                지점 선택
-                            </label>
+                            <label htmlFor="email" className="sr-only">이메일</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Store className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <select
-                                    id="branch"
-                                    value={branch}
-                                    onChange={(e) => setBranch(e.target.value)}
-                                    className="appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                >
-                                    <option value="용호동점">용호동점</option>
-                                    <option value="해운대점">해운대점</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="id" className="sr-only">사번</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <User className="h-5 w-5 text-gray-400" />
+                                    <Mail className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    id="id"
-                                    name="id"
-                                    type="text"
+                                    id="email"
+                                    name="email"
+                                    type="email"
                                     required
                                     className="appearance-none rounded-md relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                    placeholder="사번 (ID)"
-                                    value={id}
-                                    onChange={(e) => setId(e.target.value)}
+                                    placeholder="이메일 (example@healingcook.com)"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>

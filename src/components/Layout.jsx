@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, UtensilsCrossed, Factory, Archive, LogOut, Menu as MenuIcon, X } from 'lucide-react';
+import { LayoutDashboard, UtensilsCrossed, Factory, Archive, LogOut, Menu as MenuIcon, X, User } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '../lib/utils';
 
@@ -20,6 +20,7 @@ export default function Layout() {
         { name: '메뉴 관리', href: '/menus', icon: UtensilsCrossed, managerOnly: true },
         { name: '생산 관리', href: '/production', icon: Factory },
         { name: '재고 관리', href: '/inventory', icon: Archive },
+        { name: '마이 페이지', href: '/mypage', icon: User },
     ];
 
     const filteredNavigation = navigation.filter(item =>

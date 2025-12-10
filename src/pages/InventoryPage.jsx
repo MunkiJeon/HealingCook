@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { googleSheetsService } from '../services/googleSheetsService';
+import { firestoreService } from '../services/firestoreService';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,13 +11,15 @@ export default function InventoryPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadData();
+        if (user && user.branch) {
+            loadData();
+        }
     }, [user]);
 
     const loadData = async () => {
         try {
             setLoading(true);
-            const logsData = await googleSheetsService.getInventoryLogs(user.branch);
+            const logsData = await firestoreService.getInventoryLogs(user.branch);
             setLogs(logsData);
         } catch (error) {
             console.error('Failed to load data', error);

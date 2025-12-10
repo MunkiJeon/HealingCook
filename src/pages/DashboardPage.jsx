@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { googleSheetsService } from '../services/googleSheetsService';
+import { firestoreService } from '../services/firestoreService';
 import { Factory, Archive } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     todayProduction: 0,
     lastInventory: 0,
@@ -13,15 +15,17 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
+    if (user && user.branch) {
+      loadDashboardData();
+    }
   }, [user]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
       const [prodLogs, invLogs] = await Promise.all([
-        googleSheetsService.getProductionLogs(user.branch),
-        googleSheetsService.getInventoryLogs(user.branch)
+        firestoreService.getProductionLogs(user.branch),
+        firestoreService.getInventoryLogs(user.branch)
       ]);
 
       const today = new Date().toDateString();
@@ -30,6 +34,12 @@ export default function DashboardPage() {
         .reduce((sum, log) => sum + log.quantity, 0);
 
       const lastInv = invLogs.length > 0 ? invLogs[invLogs.length - 1].quantity : 0;
+      // Note: "Cumulative Inventory" usually means current stock, which is hard to calculate from logs alone without a running total logic.
+      // But the requirement says "Cumulative Inventory Record" -> Click to see Inventory Screen.
+      // For the stat, maybe just showing "Latest Count" or count of logs? 
+      // The original code took the quantity of the *last log*.
+      // We will stick to that logic or maybe just show the number of logs for today?
+      // Let's stick to original logic: quantity of last inventory log (assuming it's a "stocktake" log).
 
       const combinedLogs = [
         ...prodLogs.map(l => ({ ...l, type: 'production' })),
@@ -50,6 +60,18 @@ export default function DashboardPage() {
     }
   };
 
+  const handleRecentActivityClick = (log) => {
+    // 3-3 "배추김치(생산)" 항목 클릭시 해당 "생산 관리" 화면의 해당 메뉴 상세 화면으로 이동
+    // We don't have a "Menu Detail Screen" in Production/Inventory pages yet, mostly just lists.
+    // But we can navigate to the list.
+    // Ideally we'd highlight it, but for now just navigating to the correct page is a good step.
+    if (log.type === 'production') {
+      navigate('/production');
+    } else {
+      navigate('/inventory');
+    }
+  };
+
   if (loading) return <div className="p-4">로딩 중...</div>;
 
   return (
@@ -59,7 +81,10 @@ export default function DashboardPage() {
         <p className="text-gray-600">환영합니다, <span className="font-bold text-indigo-600">{user?.name}</span>님 ({user?.branch})</p>
 
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div
+            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => navigate('/production')}
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -77,7 +102,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div
+            className="bg-white overflow-hidden shadow rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => navigate('/inventory')}
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -100,7 +128,11 @@ export default function DashboardPage() {
         <div className="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {recentLogs.map((log) => (
-              <li key={log.id}>
+              <li
+                key={log.id}
+                onClick={() => handleRecentActivityClick(log)}
+                className="hover:bg-gray-50 cursor-pointer transition-colors"
+              >
                 <div className="px-4 py-4 sm:px-6">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-indigo-600 truncate">

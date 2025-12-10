@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { googleSheetsService } from '../services/googleSheetsService';
+import { auth } from '../lib/firebase';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { firestoreService } from '../services/firestoreService';
 
 const AuthContext = createContext(null);
 
@@ -8,28 +10,54 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage for persisted session (optional, skipping for simple MVP)
-        const storedUser = localStorage.getItem('healingCookUser');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                try {
+                    const userDoc = await firestoreService.getUser(firebaseUser.uid);
+                    if (userDoc) {
+                        setUser({ ...firebaseUser, ...userDoc });
+                    } else {
+                        // Fallback if user doc doesn't exist yet (shouldn't happen in normal flow if created properly)
+                        setUser(firebaseUser);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user details:", error);
+                    setUser(null);
+                }
+            } else {
+                setUser(null);
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, []);
 
-    const login = async (id, password, branch) => {
+    const login = async (email, password) => {
         try {
-            const user = await googleSheetsService.login(id, password, branch);
-            setUser(user);
-            localStorage.setItem('healingCookUser', JSON.stringify(user));
-            return user;
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const firebaseUser = userCredential.user;
+            const userDoc = await firestoreService.getUser(firebaseUser.uid);
+
+            if (!userDoc) {
+                throw new Error('User data not found in Firestore.');
+            }
+
+            const fullUser = { ...firebaseUser, ...userDoc };
+            setUser(fullUser);
+            return fullUser;
         } catch (error) {
             throw error;
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('healingCookUser');
+    const logout = async () => {
+        try {
+            await signOut(auth);
+            setUser(null);
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
     };
 
     return (

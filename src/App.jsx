@@ -8,6 +8,7 @@ import ProductionPage from './pages/ProductionPage';
 import ProductionFormPage from './pages/ProductionFormPage';
 import InventoryPage from './pages/InventoryPage';
 import InventoryFormPage from './pages/InventoryFormPage';
+import MyPage from './pages/MyPage';
 import Layout from './components/Layout';
 
 function ProtectedRoute({ children }) {
@@ -40,6 +41,7 @@ function App() {
             <Route path="production/new" element={<ProductionFormPage />} />
             <Route path="inventory" element={<InventoryPage />} />
             <Route path="inventory/new" element={<InventoryFormPage />} />
+            <Route path="mypage" element={<MyPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
