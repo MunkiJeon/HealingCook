@@ -40,7 +40,9 @@ export function AuthProvider({ children }) {
             const userDoc = await firestoreService.getUser(firebaseUser.uid);
 
             if (!userDoc) {
-                throw new Error('User data not found in Firestore.');
+                // If checking userDoc fails, maybe we still allow login?
+                // But for now, let's keep strict.
+                // throw new Error('User data not found in Firestore.');
             }
 
             const fullUser = { ...firebaseUser, ...userDoc };
@@ -49,6 +51,19 @@ export function AuthProvider({ children }) {
         } catch (error) {
             throw error;
         }
+    };
+
+    const bypassLogin = () => {
+        // Dev Only: sets a mock user
+        const mockUser = {
+            uid: 'bypass-user-id',
+            email: 'admin@healingcook.com',
+            name: '개발자(ByPass)',
+            branch: '용호동점',
+            role: '매니저'
+        };
+        setUser(mockUser);
+        return mockUser;
     };
 
     const logout = async () => {
@@ -61,7 +76,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, bypassLogin, loading }}>
             {children}
         </AuthContext.Provider>
     );

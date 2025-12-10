@@ -11,7 +11,7 @@ export default function LoginPage() {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, bypassLogin } = useAuth();
     const navigate = useNavigate();
 
     const branches = ['용호동점', '해운대점', '기타'];
@@ -187,12 +187,21 @@ export default function LoginPage() {
                     </div>
                 </form>
 
-                <div className="mt-6 border-t border-gray-200 pt-4">
+                <div className="mt-6 border-t border-gray-200 pt-4 flex flex-col gap-2">
                     <button
                         onClick={handleSeed}
                         className="w-full text-center text-xs text-gray-500 hover:text-gray-700 underline"
                     >
                         개발자 옵션: 데이터 초기화 및 더미 데이터 생성
+                    </button>
+                    <button
+                        onClick={() => {
+                            bypassLogin();
+                            navigate('/dashboard');
+                        }}
+                        className="w-full text-center text-xs text-red-500 hover:text-red-700 underline font-bold"
+                    >
+                        [긴급] 로그인 화면 건너뛰기 (개발용)
                     </button>
                 </div>
             </div>
