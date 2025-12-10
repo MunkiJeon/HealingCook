@@ -3,9 +3,15 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 import { db, auth } from '../lib/firebase';
 
 const MOCK_USERS = [
-    { id: 'admin', password: '123', name: '관리자', branch: '용호동점', role: '매니저' },
-    { id: 'staff1', password: '123', name: '직원1', branch: '용호동점', role: '직원' },
-    { id: 'staff2', password: '123', name: '직원2', branch: '해운대점', role: '직원' },
+    { id: 'admin', password: '1234', name: '관리자', branch: '용호동점', role: '매니저' },
+    { id: 'staff1', password: '1234', name: '직원1', branch: '용호동점', role: '직원' },
+    { id: 'staff2', password: '1234', name: '직원2', branch: '해운대점', role: '직원' },
+    { id: 'MK000', password: '0709', name: '전문기', branch: '용호동점', role: '매니저' },
+    { id: 'MK000', password: '0709', name: '전문기', branch: '해운대점', role: '매니저' },
+    { id: 'KYH001', password: '0000', name: '김영화', branch: '용호동점', role: '매니저' },
+    { id: 'KYH001', password: '0000', name: '김영화', branch: '해운대점', role: '매니저' },
+    { id: 'KTH001', password: '0000', name: '김태휘', branch: '용호동점', role: '매니저' },
+    { id: 'KMS001', password: '0000', name: '김민성', branch: '해운대점', role: '매니저' },
 ];
 
 const MOCK_MENUS = [
